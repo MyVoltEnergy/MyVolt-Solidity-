@@ -102,69 +102,7 @@ contract MVOLTVesting is Ownable {
 
     address public tokenContract;
 
-    constructor() {
-        uint256 decimals = 10**18;
-
-        // Team - 100,000,000 tokens vested over 48 months, cliff at 29 months, 5% monthly
-        uint256 teamTotal = 100000000 * decimals;
-        uint256 teamMonthly = (teamTotal * 5) / 100; // Monthly release of 5%
-        vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE]
-            .tokensPerCliff = new uint256[](19); // 48 - 29 = 19 months of distribution
-        vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE]
-            .cliffs = new uint256[](19);
-        for (uint256 i = 0; i < 19; i++) {
-            vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE]
-                .tokensPerCliff[i] = teamMonthly;
-            vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE].cliffs[
-                i
-            ] = block.timestamp + (29 + i) * 30 days;
-        }
-
-        // Treasury - 260,000,000 tokens vested over 48 months, cliff at 24 months, 4% monthly
-        uint256 treasuryTotal = 260000000 * decimals;
-        uint256 treasuryMonthly = (treasuryTotal * 4) / 100; 
-        vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE]
-            .tokensPerCliff = new uint256[](24); // 48 - 24 = 24 months of distribution
-        vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE]
-            .cliffs = new uint256[](24);
-        for (uint256 i = 0; i < 24; i++) {
-            vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE]
-                .tokensPerCliff[i] = treasuryMonthly;
-            vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE].cliffs[
-                i
-            ] = block.timestamp + (24 + i) * 30 days;
-        }
-
-        // Marketing - 80,000,000 tokens vested over 48 months, cliff at 9 months, 2.5% monthly
-        uint256 marketingTotal = 80000000 * decimals;
-        uint256 marketingMonthly = (marketingTotal * 25) / 1000; 
-        vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE]
-            .tokensPerCliff = new uint256[](39); // 48 - 9 = 39 months of distribution
-        vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE]
-            .cliffs = new uint256[](39);
-        for (uint256 i = 0; i < 39; i++) {
-            vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE]
-                .tokensPerCliff[i] = marketingMonthly;
-            vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE].cliffs[
-                i
-            ] = block.timestamp + (9 + i) * 30 days;
-        }
-
-        // Advisors - 50,000,000 tokens vested over 18 months, cliff at 8 months, 10% monthly
-        uint256 advisorsTotal = 50000000 * decimals;
-        uint256 advisorsMonthly = (advisorsTotal * 10) / 100; 
-        vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE]
-            .tokensPerCliff = new uint256[](10); // 18 - 8 = 10 months of distribution
-        vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE]
-            .cliffs = new uint256[](10);
-        for (uint256 i = 0; i < 10; i++) {
-            vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE]
-                .tokensPerCliff[i] = advisorsMonthly;
-            vestingSchedules[0x318cBF186eB13C74533943b054959867eE44eFFE].cliffs[
-                i
-            ] = block.timestamp + (8 + i) * 30 days;
-        }
-    }
+    constructor() {}
 
     function getVestingSchedule(address beneficiary)
         external
@@ -267,5 +205,3 @@ contract MVOLTVesting is Ownable {
         );
     }
 }
-
-
