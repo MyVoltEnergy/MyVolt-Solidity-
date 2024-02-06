@@ -1,24 +1,39 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 interface IERC20 {
-    
     event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
 
     function totalSupply() external view returns (uint256);
+
     function balanceOf(address account) external view returns (uint256);
+
     function transfer(address to, uint256 value) external returns (bool);
-    function allowance(address owner, address spender) external view returns (uint256);
+
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256);
 
     function approve(address spender, uint256 value) external returns (bool);
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) external returns (bool);
 }
 
 interface IERC20Metadata is IERC20 {
-   
     function name() external view returns (string memory);
+
     function symbol() external view returns (string memory);
+
     function decimals() external view returns (uint8);
 }
 
@@ -35,7 +50,10 @@ abstract contract Context {
 abstract contract Ownable is Context {
     address private _owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     constructor() {
         _transferOwnership(_msgSender());
@@ -59,7 +77,10 @@ abstract contract Ownable is Context {
     }
 
     function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        require(
+            newOwner != address(0),
+            "Ownable: new owner is the zero address"
+        );
         _transferOwnership(newOwner);
     }
 
@@ -71,19 +92,26 @@ abstract contract Ownable is Context {
 }
 
 interface IERC20Errors {
-    
-    error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed);
+    error ERC20InsufficientBalance(
+        address sender,
+        uint256 balance,
+        uint256 needed
+    );
     error ERC20InvalidSender(address sender);
     error ERC20InvalidReceiver(address receiver);
-    error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed);
+    error ERC20InsufficientAllowance(
+        address spender,
+        uint256 allowance,
+        uint256 needed
+    );
     error ERC20InvalidApprover(address approver);
     error ERC20InvalidSpender(address spender);
 }
 
 abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
-    mapping(address account => uint256) private _balances;
+    mapping(address => uint256) private _balances;
 
-    mapping(address account => mapping(address spender => uint256)) private _allowances;
+    mapping(address => mapping(address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
 
@@ -121,25 +149,41 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
         return true;
     }
 
- 
-    function allowance(address owner, address spender) public view virtual returns (uint256) {
+    function allowance(address owner, address spender)
+        public
+        view
+        virtual
+        returns (uint256)
+    {
         return _allowances[owner][spender];
     }
 
-    function approve(address spender, uint256 value) public virtual returns (bool) {
+    function approve(address spender, uint256 value)
+        public
+        virtual
+        returns (bool)
+    {
         address owner = _msgSender();
         _approve(owner, spender, value);
         return true;
     }
 
-    function transferFrom(address from, address to, uint256 value) public virtual returns (bool) {
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) public virtual returns (bool) {
         address spender = _msgSender();
         _spendAllowance(from, spender, value);
         _transfer(from, to, value);
         return true;
     }
 
-    function _transfer(address from, address to, uint256 value) internal virtual {
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual {
         if (from == address(0)) {
             revert ERC20InvalidSender(address(0));
         }
@@ -149,7 +193,11 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
         _update(from, to, value);
     }
 
-    function _update(address from, address to, uint256 value) internal virtual {
+    function _update(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual {
         if (from == address(0)) {
             _totalSupply += value;
         } else {
@@ -175,7 +223,6 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
         emit Transfer(from, to, value);
     }
 
-  
     function _mint(address account, uint256 value) internal {
         if (account == address(0)) {
             revert ERC20InvalidReceiver(address(0));
@@ -190,11 +237,20 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
         _update(account, address(0), value);
     }
 
-    function _approve(address owner, address spender, uint256 value) internal {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 value
+    ) internal {
         _approve(owner, spender, value, true);
     }
 
-    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 value,
+        bool emitEvent
+    ) internal virtual {
         if (owner == address(0)) {
             revert ERC20InvalidApprover(address(0));
         }
@@ -207,11 +263,19 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
         }
     }
 
-    function _spendAllowance(address owner, address spender, uint256 value) internal virtual {
+    function _spendAllowance(
+        address owner,
+        address spender,
+        uint256 value
+    ) internal virtual {
         uint256 currentAllowance = allowance(owner, spender);
         if (currentAllowance != type(uint256).max) {
             if (currentAllowance < value) {
-                revert ERC20InsufficientAllowance(spender, currentAllowance, value);
+                revert ERC20InsufficientAllowance(
+                    spender,
+                    currentAllowance,
+                    value
+                );
             }
             unchecked {
                 _approve(owner, spender, currentAllowance - value, false);
@@ -222,14 +286,11 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
 
 abstract contract Pausable is Context {
     bool private _paused;
-
     event Paused(address account);
     event Unpaused(address account);
-
     error EnforcedPause();
     error ExpectedPause();
 
-   
     constructor() {
         _paused = false;
     }
@@ -273,46 +334,25 @@ abstract contract Pausable is Context {
 
 contract MyVoltToken is ERC20, Ownable, Pausable {
 
-    uint256 public constant maxSupply = 270000000 * 10 ** 18;
+    uint256 public constant maxSupply = 1000000000 * 10**18;
+    mapping(address => bool) public _isBlacklisted;
+    mapping(bytes32 => uint256) public timelock;
 
-    mapping (address => bool) public  _isBlacklisted;
+    uint256 public constant MIN_DELAY = 86400; // 1 day
+    event ActionScheduled(bytes32 indexed actionId, uint256 targetTime);
+    event ActionExecuted(bytes32 indexed actionId);
 
     address public vestingContract;
+    address public stakingContract;
+    
+    event TokensMintedForEcosystem(address indexed to, uint256 amount);
+
 
     constructor(address vestingContract_) ERC20("MyVolt Token", "MVOLT") {
-        require(vestingContract_ != address(0) ,  "Invalid Address!");
+        require(vestingContract_ != address(0), "Invalid Address!");
         vestingContract = vestingContract_;
 
-        
-        _mint(0x318cBF186eB13C74533943b054959867eE44eFFE, 1215000 * 10 ** 18);
-        _mint(vestingContract, 6885000 * 10 ** 18); 
-
-        /// PRIVATE
-        _mint(0x318cBF186eB13C74533943b054959867eE44eFFE, 3240000 * 10 ** 18);
-        _mint(vestingContract, 12960000 * 10 ** 18); 
-
-        /// PUBLIC
-        _mint(0x318cBF186eB13C74533943b054959867eE44eFFE, 16200000 * 10 ** 18);
-
-        /// LIQUIDITY & EXCHANGES
-        _mint(0x318cBF186eB13C74533943b054959867eE44eFFE, 54000000 * 10 ** 18);
-
-        /// COMMUNITY FUNDS
-        _mint(0x318cBF186eB13C74533943b054959867eE44eFFE, 110700000 * 10 ** 18);
-
-        /// TEAM
-        _mint(vestingContract, 32400000 * 10 ** 18);
-
-        /// ADVISORS
-        _mint(vestingContract, 5400000 * 10 ** 18); 
-
-        /// MARKETING
-        _mint(0x318cBF186eB13C74533943b054959867eE44eFFE, 1350000 * 10 ** 18);
-        _mint(vestingContract, 12150000 * 10 ** 18);
-
-        /// R&D
-        _mint(0x318cBF186eB13C74533943b054959867eE44eFFE, 1350000 * 10 ** 18);
-        _mint(vestingContract, 12150000 * 10 ** 18);
+        _distributeTokens(vestingContract_);
     }
 
     function _transfer(
@@ -320,23 +360,83 @@ contract MyVoltToken is ERC20, Ownable, Pausable {
         address to,
         uint256 amount
     ) internal virtual override whenNotPaused {
-        require(!_isBlacklisted[from] && !_isBlacklisted[to], "To Or From Address Is Blacklisted!");    
+        require(
+            !_isBlacklisted[from] && !_isBlacklisted[to],
+            "To Or From Address Is Blacklisted!"
+        );
         super._transfer(from, to, amount);
-  
     }
 
-   
-    function burn(uint256 amount) public virtual {
+    function scheduleAction(bytes32 actionId, uint256 delay)
+        internal
+        onlyOwner
+    {
+        require(delay >= MIN_DELAY, "Delay too short");
+        uint256 targetTime = block.timestamp + delay;
+        timelock[actionId] = targetTime;
+        emit ActionScheduled(actionId, targetTime);
+    }
+
+    modifier executable(bytes32 actionId) {
+        require(
+            timelock[actionId] != 0 && timelock[actionId] <= block.timestamp,
+            "Action not ready or unknown"
+        );
+        _;
+        delete timelock[actionId];
+        emit ActionExecuted(actionId);
+    }
+
+    function schedulePause(uint256 delay) external onlyOwner {
+        scheduleAction(keccak256("pause"), delay);
+    }
+
+    function executePause() external onlyOwner executable(keccak256("pause")) {
+        _pause();
+    }
+
+    function scheduleUnpause(uint256 delay) external onlyOwner {
+        scheduleAction(keccak256("unpause"), delay);
+    }
+
+    function executeUnpause()
+        external
+        onlyOwner
+        executable(keccak256("unpause"))
+    {
+        _unpause();
+    }
+
+    function scheduleSetBlacklist(
+        address account,
+        bool value,
+        uint256 delay
+    ) external onlyOwner {
+        bytes32 actionId = keccak256(
+            abi.encodePacked("setBlacklist", account, value)
+        );
+        scheduleAction(actionId, delay);
+    }
+
+    function executeSetBlacklist(address account, bool value)
+        external
+        onlyOwner
+        executable(keccak256(abi.encodePacked("setBlacklist", account, value)))
+    {
+        _isBlacklisted[account] = value;
+    }
+
+    function burn(uint256 amount) public {
         _burn(_msgSender(), amount);
     }
 
-    function burnFrom(address account, uint256 amount) public virtual {
+    function burnFrom(address account, uint256 amount) public {
         _spendAllowance(account, _msgSender(), amount);
         _burn(account, amount);
     }
 
-    function setBlacklist(address account, bool value) external onlyOwner {
-        _isBlacklisted[account] = value;
+    function getVestingContractAddress() external view returns (address) {
+        return vestingContract;
     }
 
     function setVestingContract(address newContract) external onlyOwner {
@@ -344,19 +444,53 @@ contract MyVoltToken is ERC20, Ownable, Pausable {
         vestingContract = newContract;
     }
 
+    function setStakingContract(address _stakingContract) external onlyOwner {
+        require(_stakingContract != address(0), "Invalid Address!");
+        stakingContract = _stakingContract;
+    }
+
     function withdraw(address recipient, uint256 amount) external onlyOwner {
         require(recipient != address(0), "Invalid Address!");
-
         (bool sent, ) = recipient.call{value: amount}("");
         require(sent, "Failed to send Ether");
     }
 
-    function pause() external onlyOwner {
-        _pause();
+    function _distributeTokens(address vestingContractAddress) private {
+        uint256 theToken = 1e18;
+
+        // Seed Sale
+        _mint(vestingContractAddress, 25000000 * theToken);
+
+        // Public Sale
+        _mint(vestingContractAddress, 90000000 * theToken);
+
+        // Team
+        _mint(vestingContractAddress, 100000000 * theToken);
+
+        // Treasury
+        _mint(vestingContractAddress, 260000000 * theToken);
+
+        // Marketing
+        _mint(vestingContractAddress, 80000000 * theToken);
+
+        // Advisors
+        _mint(vestingContractAddress, 5000000 * theToken);
+
+        // Liquidity Pool
+        _mint(0x318cBF186eB13C74533943b054959867eE44eFFE, 150000000 * theToken);
     }
 
-    function unpause() external onlyOwner {
-        _unpause();
+    function _mintForEcosystem() private onlyOwner {
+        require(
+            stakingContract != address(0),
+            "Staking contract address not set."
+        );
+        uint256 ecosystemAmount = 245000000 * 1e18; 
+        _mint(stakingContract, ecosystemAmount);
+        emit TokensMintedForEcosystem(stakingContract, ecosystemAmount);
     }
 
+    function mintTokensForEcosystem() external onlyOwner {
+        _mintForEcosystem();
+    }
 }
