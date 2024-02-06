@@ -332,7 +332,7 @@ abstract contract Pausable is Context {
     }
 }
 
-contract MyVoltToken is ERC20, Ownable, Pausable {
+contract MVOLTToken is ERC20, Ownable, Pausable {
 
     uint256 public constant maxSupply = 1000000000 * 10**18;
     mapping(address => bool) public _isBlacklisted;
