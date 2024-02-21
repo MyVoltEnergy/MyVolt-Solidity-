@@ -37,7 +37,7 @@ interface IERC20Metadata is IERC20 {
     function decimals() external view returns (uint8);
 }
 
-abstract contract Context {
+ contract Context {
     function _msgSender() internal view virtual returns (address) {
         return msg.sender;
     }
@@ -91,7 +91,7 @@ abstract contract Ownable is Context {
     }
 }
 
-contract MVOLTVesting is Ownable {
+contract MyVoltVesting is Ownable {
     struct VestingSchedule {
         uint256[] tokensPerCliff;
         uint256[] cliffs;
