@@ -37,7 +37,7 @@ interface IERC20Metadata is IERC20 {
     function decimals() external view returns (uint8);
 }
 
-abstract contract Context {
+contract Context {
     function _msgSender() internal view virtual returns (address) {
         return msg.sender;
     }
@@ -47,7 +47,7 @@ abstract contract Context {
     }
 }
 
-abstract contract Ownable is Context {
+contract Ownable is Context {
     address private _owner;
 
     event OwnershipTransferred(
@@ -79,7 +79,7 @@ abstract contract Ownable is Context {
     function transferOwnership(address newOwner) public virtual onlyOwner {
         require(
             newOwner != address(0),
-            "Ownable: new owner is the zero address"
+            "New owner is the zero address"
         );
         _transferOwnership(newOwner);
     }
@@ -108,7 +108,7 @@ interface IERC20Errors {
     error ERC20InvalidSpender(address spender);
 }
 
-abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
+contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -332,13 +332,13 @@ abstract contract Pausable is Context {
     }
 }
 
-contract MVOLTToken is ERC20, Ownable, Pausable {
+contract MyVoltToken is ERC20, Ownable, Pausable {
 
-    uint256 public constant maxSupply = 1000000000 * 10**18;
+    uint256 public constant MAX_SUPPLY = 1000000000 * 10**18;
     mapping(address => bool) public _isBlacklisted;
     mapping(bytes32 => uint256) public timelock;
 
-    uint256 public constant MIN_DELAY = 86400; // 1 day
+    uint256 public constant MIN_DELAY = 60; 
     event ActionScheduled(bytes32 indexed actionId, uint256 targetTime);
     event ActionExecuted(bytes32 indexed actionId);
 
@@ -362,7 +362,7 @@ contract MVOLTToken is ERC20, Ownable, Pausable {
     ) internal virtual override whenNotPaused {
         require(
             !_isBlacklisted[from] && !_isBlacklisted[to],
-            "To Or From Address Is Blacklisted!"
+            "To Or From Address: Blacklisted!"
         );
         super._transfer(from, to, amount);
     }
@@ -456,36 +456,36 @@ contract MVOLTToken is ERC20, Ownable, Pausable {
     }
 
     function _distributeTokens(address vestingContractAddress) private {
-        uint256 theToken = 1e18;
+        //uint256 theToken = 1e18;
 
         // Seed Sale
-        _mint(vestingContractAddress, 25000000 * theToken);
+        _mint(vestingContractAddress, 30000000 * 10 ** 18);
 
         // Public Sale
-        _mint(vestingContractAddress, 90000000 * theToken);
+        _mint(vestingContractAddress, 90000000 * 10 ** 18);
 
         // Team
-        _mint(vestingContractAddress, 100000000 * theToken);
+        _mint(vestingContractAddress, 100000000 * 10 ** 18);
 
         // Treasury
-        _mint(vestingContractAddress, 260000000 * theToken);
+        _mint(vestingContractAddress, 280000000 * 10 ** 18);
 
         // Marketing
-        _mint(vestingContractAddress, 80000000 * theToken);
+        _mint(vestingContractAddress, 85000000 * 10 ** 18);
 
         // Advisors
-        _mint(vestingContractAddress, 5000000 * theToken);
+        _mint(vestingContractAddress, 55000000 * 10 ** 18);
 
         // Liquidity Pool
-        _mint(0x318cBF186eB13C74533943b054959867eE44eFFE, 150000000 * theToken);
+        _mint(vestingContractAddress, 105000000 * 10 ** 18);
     }
 
     function _mintForEcosystem() private onlyOwner {
         require(
             stakingContract != address(0),
-            "Staking contract address not set."
+            "Staking address not set"
         );
-        uint256 ecosystemAmount = 245000000 * 1e18; 
+        uint256 ecosystemAmount = 255000000 * 10 ** 18; 
         _mint(stakingContract, ecosystemAmount);
         emit TokensMintedForEcosystem(stakingContract, ecosystemAmount);
     }
