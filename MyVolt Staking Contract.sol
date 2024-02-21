@@ -17,7 +17,7 @@ interface IERC20 {
     function balanceOf(address account) external view returns (uint256);
 }
 
-abstract contract Context {
+contract Context {
     function _msgSender() internal view virtual returns (address) {
         return msg.sender;
     }
@@ -71,7 +71,7 @@ abstract contract Ownable is Context {
     }
 }
 
-contract StakingContract is Ownable, ReentrancyGuard {
+contract MyVoltStakingContract is Ownable, ReentrancyGuard {
     IERC20 public stakingToken;
     bool public emergencyStop = false;
 
@@ -83,16 +83,14 @@ contract StakingContract is Ownable, ReentrancyGuard {
     }
 
     mapping(address => Stake) public stakes;
-    uint256 public constant DAILY_RATE_6_MONTHS = 12 ether; //12% APY
-    uint256 public constant DAILY_RATE_12_MONTHS = 14 ether; // 14% APY
+
+    uint256 private constant BASIS_POINTS = 10000;
+    uint256 private constant DAYS_IN_YEAR = 365;
+    uint256 public constant DAILY_RATE_6_MONTHS = (800 * BASIS_POINTS) / DAYS_IN_YEAR; // 8% APY in basis points
+    uint256 public constant DAILY_RATE_12_MONTHS = (1200 * BASIS_POINTS) / DAYS_IN_YEAR; // 12% APY in basis points
     uint256 public constant UNSTAKING_PERIOD = 10 days;
 
-    event Staked(
-        address indexed user,
-        uint256 amount,
-        uint256 startTime,
-        uint256 endTime
-    );
+    event Staked(address indexed user, uint256 amount, uint256 startTime, uint256 endTime);
     event Unstaked(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
     event EmergencyStopToggled(bool emergencyState);
@@ -119,10 +117,7 @@ contract StakingContract is Ownable, ReentrancyGuard {
 
     function stake(uint256 _amount, uint256 _duration) external whenNotStopped {
         require(_amount > 0, "Cannot stake 0");
-        require(
-            _duration == 180 days || _duration == 360 days,
-            "Invalid staking duration"
-        );
+        require(_duration == 180 days || _duration == 360 days, "Invalid staking duration");
 
         stakingToken.transferFrom(msg.sender, address(this), _amount);
 
@@ -133,21 +128,13 @@ contract StakingContract is Ownable, ReentrancyGuard {
             unstaked: false
         });
 
-        emit Staked(
-            msg.sender,
-            _amount,
-            block.timestamp,
-            block.timestamp + _duration
-        );
+        emit Staked(msg.sender, _amount, block.timestamp, block.timestamp + _duration);
     }
 
     function unstake() external nonReentrant whenNotStopped {
         Stake storage userStake = stakes[msg.sender];
         require(userStake.amount > 0, "No staked amount");
-        require(
-            block.timestamp >= userStake.endTime + UNSTAKING_PERIOD,
-            "Stake is locked!"
-        );
+        require(block.timestamp >= userStake.endTime + UNSTAKING_PERIOD, "Stake is locked!");
         require(!userStake.unstaked, "Already unstaked!");
 
         uint256 reward = calculateReward(msg.sender);
@@ -175,17 +162,9 @@ contract StakingContract is Ownable, ReentrancyGuard {
         Stake memory userStake = stakes[_user];
         if (userStake.unstaked) return 0;
 
-        uint256 durationInDays = (
-            block.timestamp > userStake.endTime
-                ? userStake.endTime
-                : block.timestamp
-        ) - userStake.startTime / 1 days;
-        uint256 rate = userStake.endTime - userStake.startTime <= 180 days
-            ? DAILY_RATE_6_MONTHS
-            : DAILY_RATE_12_MONTHS;
-
-        uint256 reward = ((userStake.amount * rate) / 365 ether) *
-            durationInDays;
+        uint256 durationInDays = (block.timestamp > userStake.endTime ? userStake.endTime : block.timestamp) - userStake.startTime / 1 days;
+        uint256 rate = userStake.endTime - userStake.startTime <= 180 days ? DAILY_RATE_6_MONTHS : DAILY_RATE_12_MONTHS;
+        uint256 reward = (userStake.amount * rate * durationInDays) / (DAYS_IN_YEAR * BASIS_POINTS);
 
         return reward;
     }
