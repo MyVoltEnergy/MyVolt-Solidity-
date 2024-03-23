@@ -329,7 +329,7 @@ abstract contract Pausable is Context {
     }
 }
 
-contract TstToken is ERC20, Ownable, Pausable {
+contract MyVoltToken is ERC20, Ownable, Pausable {
     uint256 public constant MAX_SUPPLY = 1000000000 * 10**18;
     mapping(bytes32 => uint256) public timelock;
 
@@ -342,7 +342,7 @@ contract TstToken is ERC20, Ownable, Pausable {
 
     event TokensMintedForEcosystem(address indexed to, uint256 amount);
 
-    constructor(address vestingContract_) ERC20("Testing Token", "TST") {
+    constructor(address vestingContract_) ERC20("MyVolt", "MVOLT") {
         require(vestingContract_ != address(0), "Invalid Address!");
         vestingContract = vestingContract_;
 
