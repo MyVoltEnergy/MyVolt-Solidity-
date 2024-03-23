@@ -77,10 +77,7 @@ contract Ownable is Context {
     }
 
     function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(
-            newOwner != address(0),
-            "New owner is the zero address"
-        );
+        require(newOwner != address(0), "New owner is the zero address");
         _transferOwnership(newOwner);
     }
 
@@ -332,23 +329,20 @@ abstract contract Pausable is Context {
     }
 }
 
-contract MyVoltToken is ERC20, Ownable, Pausable {
-
+contract TstToken is ERC20, Ownable, Pausable {
     uint256 public constant MAX_SUPPLY = 1000000000 * 10**18;
-    mapping(address => bool) public _isBlacklisted;
     mapping(bytes32 => uint256) public timelock;
 
-    uint256 public constant MIN_DELAY = 60; 
+    uint256 public constant MIN_DELAY = 60;
     event ActionScheduled(bytes32 indexed actionId, uint256 targetTime);
     event ActionExecuted(bytes32 indexed actionId);
 
     address public vestingContract;
     address public stakingContract;
-    
+
     event TokensMintedForEcosystem(address indexed to, uint256 amount);
 
-
-    constructor(address vestingContract_) ERC20("MyVolt Token", "MVOLT") {
+    constructor(address vestingContract_) ERC20("Testing Token", "TST") {
         require(vestingContract_ != address(0), "Invalid Address!");
         vestingContract = vestingContract_;
 
@@ -360,10 +354,6 @@ contract MyVoltToken is ERC20, Ownable, Pausable {
         address to,
         uint256 amount
     ) internal virtual override whenNotPaused {
-        require(
-            !_isBlacklisted[from] && !_isBlacklisted[to],
-            "To Or From Address: Blacklisted!"
-        );
         super._transfer(from, to, amount);
     }
 
@@ -407,25 +397,6 @@ contract MyVoltToken is ERC20, Ownable, Pausable {
         _unpause();
     }
 
-    function scheduleSetBlacklist(
-        address account,
-        bool value,
-        uint256 delay
-    ) external onlyOwner {
-        bytes32 actionId = keccak256(
-            abi.encodePacked("setBlacklist", account, value)
-        );
-        scheduleAction(actionId, delay);
-    }
-
-    function executeSetBlacklist(address account, bool value)
-        external
-        onlyOwner
-        executable(keccak256(abi.encodePacked("setBlacklist", account, value)))
-    {
-        _isBlacklisted[account] = value;
-    }
-
     function burn(uint256 amount) public {
         _burn(_msgSender(), amount);
     }
@@ -459,38 +430,27 @@ contract MyVoltToken is ERC20, Ownable, Pausable {
         //uint256 theToken = 1e18;
 
         // Seed Sale
-        _mint(vestingContractAddress, 30000000 * 10 ** 18);
+        _mint(vestingContractAddress, 30000000 * 10**18);
 
         // Public Sale
-        _mint(vestingContractAddress, 90000000 * 10 ** 18);
+        _mint(vestingContractAddress, 90000000 * 10**18);
 
         // Team
-        _mint(vestingContractAddress, 100000000 * 10 ** 18);
+        _mint(vestingContractAddress, 100000000 * 10**18);
 
         // Treasury
-        _mint(vestingContractAddress, 280000000 * 10 ** 18);
+        _mint(vestingContractAddress, 280000000 * 10**18);
 
         // Marketing
-        _mint(vestingContractAddress, 85000000 * 10 ** 18);
+        _mint(vestingContractAddress, 85000000 * 10**18);
 
         // Advisors
-        _mint(vestingContractAddress, 55000000 * 10 ** 18);
+        _mint(vestingContractAddress, 55000000 * 10**18);
 
         // Liquidity Pool
-        _mint(vestingContractAddress, 105000000 * 10 ** 18);
-    }
+        _mint(vestingContractAddress, 105000000 * 10**18);
 
-    function _mintForEcosystem() private onlyOwner {
-        require(
-            stakingContract != address(0),
-            "Staking address not set"
-        );
-        uint256 ecosystemAmount = 255000000 * 10 ** 18; 
-        _mint(stakingContract, ecosystemAmount);
-        emit TokensMintedForEcosystem(stakingContract, ecosystemAmount);
-    }
-
-    function mintTokensForEcosystem() external onlyOwner {
-        _mintForEcosystem();
+        //Tokens for the staking contract
+        _mint(vestingContractAddress, 255000000 * 10**18);
     }
 }
